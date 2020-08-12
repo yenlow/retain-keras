@@ -21,6 +21,7 @@ pd.set_option('max_colwidth', 500)
 
 def parse_arguments(parser):
     """Read user arguments"""
+    # 4895 is the voccabulary size in MIMIC-III
     parser.add_argument('--num_codes', type=int, default=4895,
                         help='Number of medical codes')
     parser.add_argument('--numeric_size', type=int, default=0,

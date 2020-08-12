@@ -62,7 +62,9 @@ def main(ARGS):
             if proceed == 'y':
                 patient_data = pred_generator.__getitem__(patient_id)
                 proba, alphas, betas = model_with_attention.predict_on_batch(patient_data)
-                visits = get_importances(alphas[0], betas[0], patient_data, model_parameters, dictionary)
+                visits = get_importances(alphas[0], betas[0], patient_data,
+                                         model_parameters, dictionary,
+                                         path_icdpath='data/CMS32_DESC_LONG_DX.txt', code_prefix='D_')
                 for visit in visits:
                     print(visit)
 

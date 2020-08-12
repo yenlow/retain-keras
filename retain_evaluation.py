@@ -17,14 +17,14 @@ def parse_arguments(parser):
                         help='Path to evaluation data')
     parser.add_argument('--path_target', type=str, default='data/target_test.pkl',
                         help='Path to evaluation target')
-    parser.add_argument('--omit_graphs', action='store_false',
+    parser.add_argument('--graphs', action='store_true',
                         help='Does not output graphs if argument is present')
     parser.add_argument('--max_seq_len', type=int, default=300,
                         help='Maximum number of visits after which the data is truncated')
     parser.add_argument('--batch_size', type=int, default=100,
                         help='Batch size for prediction (higher values are generally faster)')
     parser.add_argument('--out_directory', type=str, default='Model',
-                        help='out_directory to save the model and the log file to')
+                        help='out_directory to save model(s), callback logs and evaluation pngs')
     args = parser.parse_known_args()[0]
     return args
 

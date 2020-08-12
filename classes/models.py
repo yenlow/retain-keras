@@ -49,9 +49,9 @@ def get_model_parameters(model):
     return params
 
 
-def get_importances(alphas, betas, patient_data, model_parameters, dictionary, code_prefix='D_'):
+def get_importances(alphas, betas, patient_data, model_parameters, dictionary, path_icdpath='data/CMS32_DESC_LONG_DX.txt', code_prefix='D_'):
     """Construct dataframes that interpret each visit of the given patient"""
-    icd9dict = read_icd9dict(file='data/CMS32_DESC_LONG_DX.txt', widths=[5, 10000])
+    icd9dict = read_icd9dict(file=path_icdpath, widths=[5, 10000])
 
     importances = []
     codes = patient_data[0][0]

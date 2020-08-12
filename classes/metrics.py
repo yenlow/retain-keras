@@ -21,7 +21,7 @@ def specificity(y_true, y_pred):
 def precision_recall(y_true, y_prob, ARGS):
     """Print Precision Recall Statistics and Graph"""
     average_precision = average_precision_score(y_true, y_prob)
-    if ARGS.omit_graphs:
+    if ARGS.graphs:
         precision, recall, _ = precision_recall_curve(y_true, y_prob)
         plt.style.use('ggplot')
         plt.clf()
@@ -39,7 +39,7 @@ def precision_recall(y_true, y_prob, ARGS):
 
 
 def probability_calibration(y_true, y_prob, ARGS):
-    if ARGS.omit_graphs:
+    if ARGS.graphs:
         fig_index = 1
         name = 'My pred'
         n_bins = 20
@@ -75,7 +75,7 @@ def lift(y_true, y_prob, ARGS):
     """Print Precision Recall Statistics and Graph"""
     prevalence = sum(y_true)/len(y_true)
     average_lift = average_precision_score(y_true, y_prob) / prevalence
-    if ARGS.omit_graphs:
+    if ARGS.graphs:
         precision, recall, _ = precision_recall_curve(y_true, y_prob)
         lift_values = precision/prevalence
         plt.style.use('ggplot')
@@ -95,7 +95,7 @@ def lift(y_true, y_prob, ARGS):
 def roc(y_true, y_prob, ARGS):
     """Print ROC Statistics and Graph"""
     roc_auc = roc_auc_score(y_true, y_prob)
-    if ARGS.omit_graphs:
+    if ARGS.graphs:
         fpr, tpr, _ = roc_curve(y_true, y_prob)
         plt.plot(fpr, tpr, color='darkorange', lw=2,
                  label='ROC curve (Area = %0.3f)'% roc_auc)
