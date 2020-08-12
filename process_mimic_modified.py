@@ -15,37 +15,29 @@
 # dictionary.pkl: Python dictionary that maps string diagnosis codes to integer diagnosis codes.
 # dictionary_3digit.pkl: Python dictionary that maps string diagnosis codes to integer 3 digit diagnosis codes.
 
-import sys
-import pickle
+import os, pickle, re
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from datetime import datetime
-import os
 
-def convert_to_icd9(dx_str):
-    if dx_str.startswith('E'):
-        if len(dx_str) > 4: return dx_str[:4] + '.' + dx_str[4:]
-        else: return dx_str
-    else:
-        if len(dx_str) > 3: return dx_str[:3] + '.' + dx_str[3:]
-        else: return dx_str
+from classes.icd import convert_to_icd9, convert_to_3digit_icd9
 
-def convert_to_3digit_icd9(dx_str):
-    if dx_str.startswith('E'):
-        if len(dx_str) > 4: return dx_str[:4]
-        else: return dx_str
-    else:
-        if len(dx_str) > 3: return dx_str[:3]
-        else: return dx_str
 
 if __name__ == '__main__':
-    admission_file = sys.argv[1]
-    diagnosis_file = sys.argv[2]
-    patients_file = sys.argv[3]
-    out_directory = sys.argv[4]
-    train_proportion = float(sys.argv[5])
+    # admission_file = sys.argv[1]
+    # diagnosis_file = sys.argv[2]
+    # patients_file = sys.argv[3]
+    # out_directory = sys.argv[4]
+    # train_proportion = float(sys.argv[5])
 
+    patients_file = 'data/PATIENTS.csv'
+    admission_file = 'data/ADMISSIONS.csv'
+    diagnosis_file = 'data/DIAGNOSES_ICD.csv'
+    train_proportion = 0.8
+    out_directory = 'data'
+
+    # Read in PATIENTS.csv and recode mortality (1/0) based on date of death
     print('Collecting mortality information')
     pid_dod_map = {}
     infd = open(patients_file, 'r')
@@ -60,6 +52,7 @@ if __name__ == '__main__':
             pid_dod_map[pid] = 0
     infd.close()
 
+    # Read in ADMISSION.csv and map admissions ID to patient ID
     print('Building pid-admission mapping, admission-date mapping')
     pid_adm_map = {}
     adm_date_map = {}
@@ -75,16 +68,17 @@ if __name__ == '__main__':
         else: pid_adm_map[pid] = [adm_id]
     infd.close()
 
+    # Read in DIAGNOSES_ICD.csv and map diagnosis codes to admissions ID
     print('Building admission-dxList mapping')
     adm_dx_map = {}
     adm_dx_map_3digit = {}
     infd = open(diagnosis_file, 'r')
     infd.readline()
     for line in infd:
-        tokens = line.strip().split(',')
+        tokens = re.sub('"|\s*|\n','',line).split(',')
         adm_id = int(tokens[2])
-        dx_str = 'D_' + convert_to_icd9(tokens[4][1:-1])
-        dx_str_3digit = 'D_' + convert_to_3digit_icd9(tokens[4][1:-1])
+        dx_str = 'D_' + convert_to_icd9(tokens[4])
+        dx_str_3digit = 'D_' + convert_to_3digit_icd9(tokens[4])
 
         if adm_id in adm_dx_map:
             adm_dx_map[adm_id].append(dx_str)
@@ -97,6 +91,7 @@ if __name__ == '__main__':
             adm_dx_map_3digit[adm_id] = [dx_str_3digit]
     infd.close()
 
+    # Sort admissions within the same patient ID by admissions date
     print('Building pid-sortedVisits mapping')
     pid_seq_map = {}
     pid_seq_map_3digit = {}
@@ -109,10 +104,11 @@ if __name__ == '__main__':
         sorted_list_3digit = sorted([(adm_date_map[adm_id], adm_dx_map_3digit[adm_id]) for adm_id in adm_id_list])
         pid_seq_map_3digit[pid] = sorted_list_3digit
 
+    # Build list of various types
     print('Building pids, dates, mortality_labels, strSeqs')
     pids = []
-    dates = []
-    seqs = []
+    dates = []  #nested list of dates corresponding to seqs
+    seqs = []   #nested list of diagnosis codes grouped by admissions_id then patient_id
     morts = []
     for pid, visits in pid_seq_map.items():
         pids.append(pid)
@@ -126,6 +122,7 @@ if __name__ == '__main__':
         seqs.append(seq)
 
     print('Building pids, dates, strSeqs for 3digit ICD9 code')
+    # Truncate ICD9 to 3-digits
     seqs_3digit = []
     for pid, visits in pid_seq_map_3digit.items():
         seq = []
@@ -133,9 +130,10 @@ if __name__ == '__main__':
             seq.append(visit[1])
         seqs_3digit.append(seq)
 
+    # Convert ICD9 to dummy integers
     print('Converting strSeqs to intSeqs, and making types')
     types = {}
-    new_seqs = []
+    new_seqs = []   #nested list like seqs but ICD9 re-indexed to integers
     for patient in seqs:
         new_patient = []
         for visit in patient:
@@ -169,7 +167,8 @@ if __name__ == '__main__':
     #Compute time to today as to_event column
     today = datetime.strptime('2025-01-01', '%Y-%m-%d')
     to_event = [[(today-date).days for date in patient] for patient in dates]
-    #Compute time of the day when the person was admitted as the numeric column of size 1
+    #Compute time of the day in minutes when the person was admitted as the numeric column of size 1
+    #Midnight is -720, Noon is 0, 1159pm is +720
     numerics = [[[date.hour * 60 + date.minute - 720] for date in patient] for patient in dates]
     #Add this feature to dictionary but leave 1 index empty for PADDING
     types['Time of visit'] = len(types)+1
@@ -177,9 +176,9 @@ if __name__ == '__main__':
     #Compute sorting indicies
     sort_indicies = np.argsort(list(map(len, to_event)))
     #Create the dataframes of data and sort them according to number of visits per patient
-    all_data = pd.DataFrame(data={'codes': new_seqs,
-                                  'to_event': to_event,
-                                  'numerics': numerics}
+    all_data = pd.DataFrame(data={'codes': new_seqs,    #nested list of codes
+                                  'to_event': to_event, #days of death from ref date
+                                  'numerics': numerics} #admission time in minutes
                            ,columns=['codes', 'to_event', 'numerics'])\
                           .iloc[sort_indicies].reset_index()
     all_data_3digit = pd.DataFrame(data={'codes': new_seqs_3digit,
@@ -194,6 +193,7 @@ if __name__ == '__main__':
     data_train,data_test = train_test_split(all_data, train_size=train_proportion, random_state=12345)
     data_train_3digit,data_test_3digit = train_test_split(all_data_3digit, train_size=train_proportion, random_state=12345)
     target_train,target_test = train_test_split(all_targets, train_size=train_proportion, random_state=12345)
+    #Generate ICD dictionary
     #Reverse Dictionary into index:code format
     types = dict((v,k) for k,v in types.items())
     types_3digit = dict((v,k) for k,v in types_3digit.items())

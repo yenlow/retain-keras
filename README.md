@@ -55,7 +55,7 @@ retain_train.py has multiple arguments to customize the training and model:
 * `--use_time`: Enables the extra time input for each visit. Default: off
 * `--emb_size`: Integer Size of the embedding layer. Default: 200
 * `--epochs`: Integer Number of epochs for training. Default: 1
-* `--n_steps`: Integer Maximum number of visits after which the data is truncated. This features helps to conserve GPU Ram (only the most recent n_steps will be used). Default: 300
+* `--maxseq`: Integer Maximum number of visits after which the data is truncated. This features helps to conserve GPU Ram (only the most recent maxseq will be used). Default: 300
 * `--recurrent_size`': Integer Size of the recurrent layers. Default: 200
 * `--path_data_train`: String Path to train data. Default: 'data/data_train.pkl'
 * `--path_data_test`: String Path to test/validation data. Default: 'data/data_test.pkl'
@@ -77,7 +77,7 @@ retain_evaluation.py has some arguments:
 * `--path_data`: Path to evaluation data. Default: 'data/data_test.pkl'
 * `--path_target`: Path to evaluation target. Default: 'data/target_test.pkl'
 * `--omit_graphs`: Does not output graphs if argument is present. Default: (Graphs are output)
-* `--n_steps`: Integer Maximum number of visits after which the data is truncated. This features helps to conserve GPU Ram (only the most recent n_steps will be used). Default: 300
+* `--maxseq`: Integer Maximum number of visits after which the data is truncated. This features helps to conserve GPU Ram (only the most recent n_steps will be used). Default: 300
 * `--batch_size`: Batch size for prediction (higher values are generally faster). Default: 32
 
 ## Interpretation Arguments
