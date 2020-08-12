@@ -1,6 +1,6 @@
 # RETAIN-Keras: Keras reimplementation of RETAIN
 
-This repository is an update of [retain-keras](https://github.com/Optum/retain-keras). It was reimplemented by [Optum](https://github.com/Optum/retain-keras) to use tf.keras 1.12. Here, it is updated to use with tf.keras 1.15
+This repository is an update of [retain-keras](https://github.com/Optum/retain-keras). It was reimplemented by Optum to use tf.keras 1.12. Here, it is updated to use with tf.keras 1.15
 
 [RETAIN](https://github.com/mp2893/retain) is a neural network architecture originally introduced by [Choi et al.](https://arxiv.org/abs/1608.05745) to represent medical claims codes as embeddings and also predict diagnosis. It uses 2 Recurrent Neural Network models with double attentions weights. 
 
@@ -16,8 +16,8 @@ With these double attention weights to account for selected visits and codes, th
 * Refactored code for training, evaluation, interpretation to re-use common classes and functions
 * Disabled multi-gpu
 
-By Optum
-* Simpler Keras code with Tensorflow backend
+Previous improvements by Optum
+* Simpler Keras code with Tensorflow backend (tested for tf 1.12)
 * Ability to use extra numeric inputs of fixed size that can hold numeric information about the patients visit such as patient's age, quantity of drug prescribed, or blood pressure
 * Improved embedding logic that avoids using large dense inputs
 * Ability to create multi-gpu models (experimental)
@@ -43,19 +43,20 @@ Clone the repository
 
 ---
 ## Usage
-####1. Data processing
+#### 1. Data processing
 Reshape to nested sequence lists, split data into training and test sets
 
 `python process_mimic_modified.py ADMISSIONS.csv DIAGNOSES_ICD.csv PATIENTS.csv data .7`
-####2. Training
+
+#### 2. Training
 Checkpoint models and log callback history
 
 `python retain_train.py --additional arguments`
-####3. Evaluation
+#### 3. Evaluation
 Compute evaluation metrics on test set and save plots
 
 `python retain_evaluation.py --additional arguments`
-####4. Interpretation
+#### 4. Interpretation
 Get feature/visit importance from attention weights
 
 `python retain_interpretations.py --additional arguments`
