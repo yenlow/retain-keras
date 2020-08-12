@@ -1,6 +1,6 @@
 # RETAIN-Keras: Keras reimplementation of RETAIN
 
-This repository is an update of [retain-keras](https://github.com/Optum/retain-keras). It was reimplemented by Optum to use tf.keras 1.12. Here, it is updated to use with tf.keras 1.15
+This repository is an update of [retain-keras](https://github.com/Optum/retain-keras). It was reimplemented by [Optum](https://github.com/Optum/retain-keras) to use tf.keras 1.12. Here, it is updated to use with tf.keras 1.15
 
 [RETAIN](https://github.com/mp2893/retain) is a neural network architecture originally introduced by [Choi et al.](https://arxiv.org/abs/1608.05745) to represent medical claims codes as embeddings and also predict diagnosis. It uses 2 Recurrent Neural Network models with double attentions weights. 
 
