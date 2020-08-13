@@ -93,7 +93,7 @@ def model_create(ARGS):
                                        name='embedding'
                                        # BUG: embeddings_constraint not supported
                                        # https://github.com/tensorflow/tensorflow/issues/33755
-                                       #                                       ,embeddings_constraint=embeddings_constraint
+                                       ,embeddings_constraint=embeddings_constraint
                                        )(codes)
         codes_embs = L.Lambda(lambda x: K.sum(x, axis=2))(codes_embs_total)
         # Numeric input if needed
@@ -164,12 +164,6 @@ def model_create(ARGS):
         return model
 
     # Set Tensorflow to grow GPU memory consumption instead of grabbing all of it at once
-    # TODO: create a tf session block
-    K.clear_session()
-    config = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
-    #    config.gpu_options.allow_growth = True
-    tfsess = tf.Session(config=config)
-    K.set_session(tfsess)
     # If there are multiple GPUs set up a multi-gpu model
     # Get available gpus , returns empty list if none
     # glist = get_available_gpus()
@@ -213,16 +207,16 @@ def create_callbacks(model, data, ARGS):
 def train_model(model, data_train, y_train, data_test, y_test, ARGS):
     """Train the Model with appropriate callbacks and generator"""
     callback_list = create_callbacks(model, (data_test, y_test), ARGS)
-    train_generator = SequenceBuilder(data_train, ARGS, target=y_train)
-    test_generator = SequenceBuilder(data_test, ARGS, target=y_test)
-    history = model.fit_generator(  generator=train_generator,
-                                    epochs=ARGS.epochs, verbose=2,
-                                    validation_data=test_generator,
-                                    # validation_freq=[1, 5, 10],
-                                    callbacks=callback_list
-                                    # ,max_queue_size=15, use_multiprocessing=False,
-                                    # workers=3, initial_epoch=0
-                                    )
+    train_generator = SequenceBuilder(data_train, ARGS, target=y_train, target_out=True)
+    test_generator = SequenceBuilder(data_test, ARGS, target=y_test, target_out=True)
+    history = model.fit_generator(generator=train_generator,
+                                  epochs=ARGS.epochs, verbose=2,
+                                  validation_data=test_generator,
+                                  # validation_freq=[1, 5, 10],
+                                  callbacks=callback_list
+                                  # ,max_queue_size=15, use_multiprocessing=False,
+                                  # workers=3, initial_epoch=0
+                                  )
     return history
 
 
