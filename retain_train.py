@@ -93,7 +93,7 @@ def model_create(ARGS):
                                        name='embedding'
                                        # BUG: embeddings_constraint not supported
                                        # https://github.com/tensorflow/tensorflow/issues/33755
-                                       ,embeddings_constraint=embeddings_constraint
+                                       # ,embeddings_constraint=embeddings_constraint
                                        )(codes)
         codes_embs = L.Lambda(lambda x: K.sum(x, axis=2))(codes_embs_total)
         # Numeric input if needed
